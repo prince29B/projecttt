@@ -55,9 +55,9 @@ jobs:
 
       - name: Run Apex Tests
         run: |
-          sfdx force:apex:test:run --resultformat human --outputdir ${{ env.APEX_TEST_RESULT_DIR }} --codecoverage --targetusername ${{ env.SCRATCH_ORG_ALIAS }}
-          TEST_RUN_ID=$(cat ${{ env.APEX_TEST_RESULT_DIR }}/test-run-id.txt)
-          sfdx force:apex:test:report -i $TEST_RUN_ID --json | jq '.result.summary.codeCoverage'
+         sf apex run test --result-format human --output-dir ${{ env.APEX_TEST_RESULT_DIR }} --code-coverage --test-level RunLocalTests --target-org scratch_org_alias
+         TEST_RUN_ID=$(cat ${{ env.APEX_TEST_RESULT_DIR }}/test-run-id.txt)
+         sf apex get test --test-run-id $TEST_RUN_ID --json | jq '.result.summary.codeCoverage'
         shell: bash
 
       - name: Static Code Analysis with PMD
