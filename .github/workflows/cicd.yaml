@@ -1,0 +1,107 @@
+name: Salesforce CI/CD Pipeline
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+
+env:
+  SCRATCH_ORG_ALIAS: scratch_org_alias
+  TEST_LEVEL: RunLocalTests
+  APEX_TEST_RESULT_DIR: test-results
+
+jobs:
+  validate-pr:
+    name: Validate PR Deployment and Code Quality
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '16'
+
+      - name: Install Salesforce CLI
+        run: npm install --global sfdx-cli
+
+      - name: Authenticate to DevHub
+        run: |
+          echo "${{ secrets.SFDX_JWT_AUTH_KEY }}" > server.key
+          sfdx auth:jwt:grant --clientid ${{ secrets.SFDX_CLIENT_ID }} --jwtkeyfile server.key --username ${{ secrets.SFDX_DEVHUB_USERNAME }} --instanceurl https://orgfarm-9e770cec2a-dev-ed.develop.my.salesforce.com --setdefaultdevhubusername
+        shell: bash
+
+      - name: Create scratch org
+        run: |
+          sfdx force:org:create -f config/project-scratch-def.json -d 1 -s --setalias ${{ env.SCRATCH_ORG_ALIAS }} --wait 10
+        shell: bash
+
+      - name: Push source
+        run: sfdx force:source:push -u ${{ env.SCRATCH_ORG_ALIAS }}
+        shell: bash
+
+      - name: Validate deployment
+        run: sfdx force:source:deploy --checkonly --targetusername ${{ env.SCRATCH_ORG_ALIAS }}
+        shell: bash
+
+      - name: Run Apex Tests
+        run: |
+          sfdx force:apex:test:run --resultformat human --outputdir ${{ env.APEX_TEST_RESULT_DIR }} --codecoverage --targetusername ${{ env.SCRATCH_ORG_ALIAS }}
+          TEST_RUN_ID=$(cat ${{ env.APEX_TEST_RESULT_DIR }}/test-run-id.txt)
+          sfdx force:apex:test:report -i $TEST_RUN_ID --json | jq '.result.summary.codeCoverage'
+        shell: bash
+
+      - name: Static Code Analysis with PMD
+        run: |
+          wget https://github.com/pmd/pmd/releases/download/pmd_releases%2F6.55.0/pmd-bin-6.55.0.zip
+          unzip -q pmd-bin-6.55.0.zip
+          ./pmd-bin-6.55.0/bin/run.sh pmd -d force-app -R rulesets/apex/apex-design.xml -f text
+        shell: bash
+
+      - name: ESLint + Prettier
+        run: |
+          npm ci
+          npx eslint force-app --ext .js --max-warnings 0
+          npx prettier --check "force-app/**/*.{cls,js,html}"
+        shell: bash
+
+      - name: PR Rejection Conditions
+        if: failure()
+        run: |
+          echo "Deployment or Code Quality Checks failed. PR will be rejected."
+        shell: bash
+
+  deploy-main:
+    name: Deploy to UAT/Prod on Merge
+    runs-on: ubuntu-latest
+    needs: validate-pr
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '16'
+
+      - name: Install Salesforce CLI
+        run: npm install --global sfdx-cli
+
+      - name: Authenticate to Production Org
+        run: |
+          echo "${{ secrets.SFDX_JWT_AUTH_KEY }}" > server.key
+          sfdx auth:jwt:grant --clientid ${{ secrets.SFDX_CLIENT_ID }} --jwtkeyfile server.key --username ${{ secrets.SFDX_PROD_USERNAME }} --instanceurl https://orgfarm-9e770cec2a-dev-ed.develop.my.salesforce.com --setdefaultusername
+        shell: bash
+
+      - name: Deploy to Production
+        run: sfdx force:source:deploy --targetusername ${{ secrets.SFDX_PROD_USERNAME }} --testlevel ${{ env.TEST_LEVEL }} --wait 10
+        shell: bash
+
+      - name: Post-deploy Tests
+        run: sfdx force:apex:test:run --targetusername ${{ secrets.SFDX_PROD_USERNAME }} --resultformat human --wait 10
+        shell: bash
