@@ -54,7 +54,7 @@ jobs:
         shell: bash
 
       - name: Run Apex Tests
-        run: sfdx force:apex:test:run -u ${{ env.SCRATCH_ORG_ALIAS }} --resultformat human --codecoverage --wait 10 --outputdir test-results
+        run: sfdx force:apex:test:run -u ${{ env.SCRATCH_ORG_ALIAS }} --testlevel RunLocalTests --result-format human --code-coverage --wait 10 --outputdir test-result
 
       - name: Check Coverage
         run: |
