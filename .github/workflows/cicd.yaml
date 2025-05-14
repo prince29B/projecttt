@@ -31,7 +31,7 @@ jobs:
       - name: Authenticate to DevHub
         run: |
           echo "${{ secrets.SFDX_JWT_AUTH_KEY }}" > server.key
-          sfdx auth:jwt:grant --client-id ${{ secrets.SFDX_CLIENT_ID }} --jwt-key-file server.key --username ${{ secrets.SFDX_DEVHUB_USERNAME }} --instance-url https://orgfarm-9e770cec2a-dev-ed.develop.my.salesforce.com  --setdefaultdevhubusername -a DevHub
+          sfdx auth:jwt:grant --client-id ${{ secrets.SFDX_CLIENT_ID }} --jwt-key-file server.key --username ${{ secrets.SFDX_DEVHUB_USERNAME }} --instance-url https://orgfarm-9e770cec2a-dev-ed.develop.my.salesforce.com  --setdefaultdevhubusername  --setalias myDevHub --setdefaultdevhubusername
         shell: bash
 
       - name: List Orgs (for debugging)
