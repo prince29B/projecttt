@@ -50,7 +50,7 @@ jobs:
         shell: bash
 
       - name: Validate deployment
-        run: sfdx force:source:deploy --checkonly --targetusername ${{ env.SCRATCH_ORG_ALIAS }}
+        run: sfdx force:source:deploy --checkonly --targetusername ${{ env.SCRATCH_ORG_ALIAS }}  --sourcepath force-app
         shell: bash
 
       - name: Run Apex Tests
