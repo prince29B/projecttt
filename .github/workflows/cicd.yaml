@@ -31,7 +31,7 @@ jobs:
       - name: Authenticate to DevHub
         run: |
           echo "${{ secrets.SFDX_JWT_AUTH_KEY }}" > server.key
-          sfdx auth:jwt:grant --clientid ${{ secrets.SFDX_CLIENT_ID }} --jwtkeyfile server.key --username ${{ secrets.SFDX_DEVHUB_USERNAME }} --instanceurl https://orgfarm-9e770cec2a-dev-ed.develop.my.salesforce.com --setdefaultdevhubusername
+          sfdx auth:jwt:grant --client-id ${{ secrets.SFDX_CLIENT_ID }} --jwt-key-file server.key --username ${{ secrets.SFDX_DEVHUB_USERNAME }} --instance-url https://orgfarm-9e770cec2a-dev-ed.develop.my.salesforce.com --set-default-dev-hub
         shell: bash
 
       - name: Create scratch org
@@ -95,7 +95,7 @@ jobs:
       - name: Authenticate to Production Org
         run: |
           echo "${{ secrets.SFDX_JWT_AUTH_KEY }}" > server.key
-          sfdx auth:jwt:grant --clientid ${{ secrets.SFDX_CLIENT_ID }} --jwtkeyfile server.key --username ${{ secrets.SFDX_PROD_USERNAME }} --instanceurl https://orgfarm-9e770cec2a-dev-ed.develop.my.salesforce.com --setdefaultusername
+          sfdx auth:jwt:grant --client-id ${{ secrets.SFDX_CLIENT_ID }} --jwt-key-file server.key --username ${{ secrets.SFDX_PROD_USERNAME }} --instance-url https://orgfarm-9e770cec2a-dev-ed.develop.my.salesforce.com --set-default-username
         shell: bash
 
       - name: Deploy to Production
