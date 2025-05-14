@@ -54,11 +54,19 @@ jobs:
         shell: bash
 
       - name: Run Apex Tests
+        run: sfdx force:apex:test:run -u ${{ env.SCRATCH_ORG_ALIAS }} --resultformat human --codecoverage --wait 10 --outputdir test-results
+
+      - name: Check Coverage
         run: |
-         sf apex run test --result-format human --output-dir ${{ env.APEX_TEST_RESULT_DIR }} --code-coverage --test-level RunLocalTests --target-org scratch_org_alias
-         TEST_RUN_ID=$(cat ${{ env.APEX_TEST_RESULT_DIR }}/test-run-id.txt)
-         sf apex get test --test-run-id $TEST_RUN_ID --json | jq '.result.summary.codeCoverage'
-        shell: bash
+          totalCoverage=$(sfdx force:apex:test:report -u ${{ env.SCRATCH_ORG_ALIAS }} --codecoverage --json | jq '.result.summary.testRunCoverage')
+          echo "Total Coverage: $totalCoverage"
+
+          if (( $(echo "$totalCoverage < 75" | bc -l) )); then
+            echo "❌ Code coverage below 75%. Failing build."
+            exit 1
+          else
+            echo "✅ Code coverage is sufficient."
+          
 
       - name: Static Code Analysis with PMD
         run: |
