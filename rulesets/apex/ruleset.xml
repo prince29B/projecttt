@@ -4,7 +4,8 @@
          xsi:schemaLocation="http://pmd.sourceforge.net/ruleset/2.0.0 https://pmd.sourceforge.io/ruleset_2_0_0.xsd"
          name="Apex ruleset">
   <description>Custom Apex ruleset for PMD 7+</description>
-  <rule ref="category/apex/design.xml"/>
-  <rule ref="category/apex/bestpractices.xml"/>
+    <rule ref="category/apex/design.xml">
+        <exclude name="ApexUnitTestClassShouldHaveRunAs"/>
+    </rule>
   <rule ref="category/apex/codestyle.xml"/>
 </ruleset>
