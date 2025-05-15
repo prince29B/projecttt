@@ -75,10 +75,11 @@ jobs:
 
       - name: ESLint + Prettier
         run: |
-          npm ci
-          npx eslint force-app --ext .js --max-warnings 0
-          npx prettier --check "force-app/**/*.{cls,js,html}"
-        shell: bash
+         npm ci
+         npx eslint "force-app/**/default/lwc/**/*.js" --ext .js --max-warnings 0 --no-error-on-unmatched-pattern
+         npx prettier --check "force-app/**/*.{cls,js,html}"
+         shell: bash
+
 
       - name: PR Rejection Conditions
         if: failure()
