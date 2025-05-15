@@ -7,7 +7,6 @@ on:
     branches: [main]
 
 env:
-  DEV_ORG_ALIAS: dev-org
   TEST_LEVEL: RunLocalTests
   APEX_TEST_RESULT_DIR: test-results
 
@@ -46,39 +45,39 @@ jobs:
       - name: Deployment Validation
         run: sfdx force:source:deploy --checkonly --sourcepath force-app --targetusername DevHub
 
-      # - name: Run Apex Tests
-      #   run: |
-      #     sfdx apex run test --target-org ${{ env.SCRATCH_ORG_ALIAS }} \
-      #       --test-level ${{ env.TEST_LEVEL }} --code-coverage \
-      #       --output-dir ${{ env.APEX_TEST_RESULT_DIR }} --result-format human --wait 10
-      #   shell: bash
+      - name: Run Apex Tests
+        run: |
+         sfdx apex run test --target-org DevHub \
+            --test-level ${{ env.TEST_LEVEL }} --code-coverage \
+           --output-dir ${{ env.APEX_TEST_RESULT_DIR }} --result-format human --wait 10
+        shell: bash
 
-      # - name: Check Coverage
-      #   run: |
-      #     set -e
-      #     totalCoverage=$(sfdx force:apex:test:report -u ${{ env.SCRATCH_ORG_ALIAS }} --codecoverage --json | jq '.result.summary.testRunCoverage')
-      #     echo "Total Coverage: $totalCoverage%"
-      #     if (( $(echo "$totalCoverage < 75" | bc -l) )); then
-      #       echo "❌ Code coverage below 75%. Failing build."
-      #       exit 1
-      #     else
-      #       echo "✅ Code coverage is sufficient."
-      #     fi
-      #   shell: bash
+      - name: Check Coverage
+        run: |
+          set -e
+          totalCoverage=$(sfdx force:apex:test:report -u DevHub --codecoverage --json | jq '.result.summary.testRunCoverage')
+          echo "Total Coverage: $totalCoverage%"
+          if (( $(echo "$totalCoverage < 75" | bc -l) )); then
+            echo "❌ Code coverage below 75%. Failing build."
+            exit 1
+          else
+            echo "✅ Code coverage is sufficient."
+          fi
+        shell: bash
 
-      # - name: Static Code Analysis with PMD
-      #   run: |
-      #     wget https://github.com/pmd/pmd/releases/download/pmd_releases%2F6.55.0/pmd-bin-6.55.0.zip
-      #     unzip -q pmd-bin-6.55.0.zip
-      #     ./pmd-bin-6.55.0/bin/run.sh pmd -d force-app -R rulesets/apex/apex-design.xml -f text
-      #   shell: bash
+      - name: Static Code Analysis with PMD
+        run: |
+          wget https://github.com/pmd/pmd/releases/download/pmd_releases%2F6.55.0/pmd-bin-6.55.0.zip
+          unzip -q pmd-bin-6.55.0.zip
+          ./pmd-bin-6.55.0/bin/run.sh pmd -d force-app -R rulesets/apex/apex-design.xml -f text
+        shell: bash
 
-      # - name: ESLint + Prettier
-      #   run: |
-      #     npm ci
-      #     npx eslint force-app --ext .js --max-warnings 0
-      #     npx prettier --check "force-app/**/*.{cls,js,html}"
-      #   shell: bash
+      - name: ESLint + Prettier
+        run: |
+          npm ci
+          npx eslint force-app --ext .js --max-warnings 0
+          npx prettier --check "force-app/**/*.{cls,js,html}"
+        shell: bash
 
       - name: PR Rejection Conditions
         if: failure()
