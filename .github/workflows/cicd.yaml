@@ -7,7 +7,7 @@ on:
     branches: [main]
 
 env:
-  SCRATCH_ORG_ALIAS: scratch_org_alias
+  env.DEV_ORG_ALIAS: DevHub
   TEST_LEVEL: RunLocalTests
   APEX_TEST_RESULT_DIR: test-results
 
@@ -43,19 +43,16 @@ jobs:
             --instance-url https://orgfarm-9e770cec2a-dev-ed.develop.my.salesforce.com --setdefaultdevhubusername
         shell: bash
 
-      - name: Create scratch org
-        run: |
-          sfdx force:org:create -f config/project-scratch-def.json -d 1 -s \
-            --setalias ${{ env.SCRATCH_ORG_ALIAS }} --wait 10
+     # Remove the scratch org creation step entirely
+
+      - name: Deploy source to Dev Org
+        run: sfdx force:source:deploy -u ${{ env.DEV_ORG_ALIAS }} --sourcepath force-app
         shell: bash
 
-      - name: Push source
-        run: sfdx force:source:push -u ${{ env.SCRATCH_ORG_ALIAS }}
+      - name: Validate deployment (optional)
+        run: sfdx force:source:deploy --checkonly --targetusername ${{ env.DEV_ORG_ALIAS }} --sourcepath force-app
         shell: bash
 
-      - name: Validate deployment
-        run: sfdx force:source:deploy --checkonly --targetusername ${{ env.SCRATCH_ORG_ALIAS }} --sourcepath force-app
-        shell: bash
 
       # - name: Run Apex Tests
       #   run: |
