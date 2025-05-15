@@ -45,6 +45,9 @@ jobs:
       - name: Deployment Validation
         run: sfdx force:source:deploy --checkonly --sourcepath force-app --targetusername DevHub
 
+      - name: Deploy
+        run: sfdx force:source:deploy --sourcepath force-app --targetusername DevHub
+
       - name: Run Apex Tests
         run: |
          sfdx apex run test --target-org DevHub  --test-level ${{ env.TEST_LEVEL }} --code-coverage --output-dir ${{ env.APEX_TEST_RESULT_DIR }} --result-format human --wait 10
