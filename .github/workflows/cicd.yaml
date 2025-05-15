@@ -20,6 +20,13 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
+      - name: Setup Environment
+        run: |
+          set -e
+          sudo apt-get update
+          sudo apt-get install -y jq bc unzip wget
+        shell: bash
+
       - name: Setup Node.js
         uses: actions/setup-node@v3
         with:
@@ -31,18 +38,15 @@ jobs:
       - name: Authenticate to DevHub
         run: |
           echo "${{ secrets.SFDX_JWT_AUTH_KEY }}" > server.key
-          sfdx auth:jwt:grant --client-id ${{ secrets.SFDX_CLIENT_ID }} --jwt-key-file server.key --username ${{ secrets.SFDX_DEVHUB_USERNAME }} --instance-url https://orgfarm-9e770cec2a-dev-ed.develop.my.salesforce.com  --setdefaultdevhubusername 
+          sfdx auth:jwt:grant --client-id ${{ secrets.SFDX_CLIENT_ID }} \
+            --jwt-key-file server.key --username ${{ secrets.SFDX_DEVHUB_USERNAME }} \
+            --instance-url https://orgfarm-9e770cec2a-dev-ed.develop.my.salesforce.com --setdefaultdevhubusername
         shell: bash
-
-      - name: List Orgs (for debugging)
-        run: sfdx force:org:list
-        shell: bash
-
 
       - name: Create scratch org
         run: |
-         sfdx force:org:create -f config/project-scratch-def.json -d 1 -s --setalias ${{ env.SCRATCH_ORG_ALIAS }} --wait 10
-
+          sfdx force:org:create -f config/project-scratch-def.json -d 1 -s \
+            --setalias ${{ env.SCRATCH_ORG_ALIAS }} --wait 10
         shell: bash
 
       - name: Push source
@@ -50,23 +54,28 @@ jobs:
         shell: bash
 
       - name: Validate deployment
-        run: sfdx force:source:deploy --checkonly --targetusername ${{ env.SCRATCH_ORG_ALIAS }}  --sourcepath force-app
+        run: sfdx force:source:deploy --checkonly --targetusername ${{ env.SCRATCH_ORG_ALIAS }} --sourcepath force-app
         shell: bash
 
-      #- name: Run Apex Tests
-       # run: sfdx apex run test --target-org ${{ env.SCRATCH_ORG_ALIAS }} --test-level RunLocalTests  --code-coverage  --output-dir test-result  --result-format human --wait 10
+      - name: Run Apex Tests
+        run: |
+          sfdx apex run test --target-org ${{ env.SCRATCH_ORG_ALIAS }} \
+            --test-level ${{ env.TEST_LEVEL }} --code-coverage \
+            --output-dir ${{ env.APEX_TEST_RESULT_DIR }} --result-format human --wait 10
+        shell: bash
 
-      #- name: Check Coverage
-      #  run: |
-      #    totalCoverage=$(sfdx force:apex:test:report -u ${{ env.SCRATCH_ORG_ALIAS }} --codecoverage --json | jq '.result.summary.testRunCoverage')
-       ##   echo "Total Coverage: $totalCoverage"
-
-        ##  if (( $(echo "$totalCoverage < 75" | bc -l) )); then
-        #    echo "❌ Code coverage below 75%. Failing build."
-        #    exit 1
-        #  else
-        #    echo "✅ Code coverage is sufficient."
-          
+      - name: Check Coverage
+        run: |
+          set -e
+          totalCoverage=$(sfdx force:apex:test:report -u ${{ env.SCRATCH_ORG_ALIAS }} --codecoverage --json | jq '.result.summary.testRunCoverage')
+          echo "Total Coverage: $totalCoverage%"
+          if (( $(echo "$totalCoverage < 75" | bc -l) )); then
+            echo "❌ Code coverage below 75%. Failing build."
+            exit 1
+          else
+            echo "✅ Code coverage is sufficient."
+          fi
+        shell: bash
 
       - name: Static Code Analysis with PMD
         run: |
@@ -84,8 +93,7 @@ jobs:
 
       - name: PR Rejection Conditions
         if: failure()
-        run: |
-          echo "Deployment or Code Quality Checks failed. PR will be rejected."
+        run: echo "❌ Deployment or Code Quality Checks failed. PR will be rejected."
         shell: bash
 
   deploy-main:
@@ -109,13 +117,19 @@ jobs:
       - name: Authenticate to Production Org
         run: |
           echo "${{ secrets.SFDX_JWT_AUTH_KEY }}" > server.key
-          sfdx auth:jwt:grant --client-id ${{ secrets.SFDX_CLIENT_ID }} --jwt-key-file server.key --username ${{ secrets.SFDX_PROD_USERNAME }} --instance-url https://orgfarm-9e770cec2a-dev-ed.develop.my.salesforce.com --set-default-username
+          sfdx auth:jwt:grant --client-id ${{ secrets.SFDX_CLIENT_ID }} \
+            --jwt-key-file server.key --username ${{ secrets.SFDX_PROD_USERNAME }} \
+            --instance-url https://orgfarm-9e770cec2a-dev-ed.develop.my.salesforce.com --set-default-username
         shell: bash
 
       - name: Deploy to Production
-        run: sfdx force:source:deploy --targetusername ${{ secrets.SFDX_PROD_USERNAME }} --testlevel ${{ env.TEST_LEVEL }} --wait 10
+        run: |
+          sfdx force:source:deploy --targetusername ${{ secrets.SFDX_PROD_USERNAME }} \
+            --testlevel ${{ env.TEST_LEVEL }} --wait 10
         shell: bash
 
       - name: Post-deploy Tests
-        run: sfdx force:apex:test:run --targetusername ${{ secrets.SFDX_PROD_USERNAME }} --resultformat human --wait 10
+        run: |
+          sfdx force:apex:test:run --targetusername ${{ secrets.SFDX_PROD_USERNAME }} \
+            --resultformat human --wait 10
         shell: bash
