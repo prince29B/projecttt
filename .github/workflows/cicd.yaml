@@ -59,14 +59,14 @@ jobs:
       #    totalCoverage=$(sfdx force:apex:test:report -u DevHub --codecoverage --json | jq '.result.summary.testRunCoverage')
       #    echo "Total Coverage: $totalCoverage"
       #    if [[ -z "$totalCoverage" || "$totalCoverage" == "null" ]]; then
-      #    echo "❌ Could not determine code coverage. Make sure tests have run and coverage data is available."
+      #    echo " Could not determine code coverage. Make sure tests have run and coverage data is available."
       #    exit 1
       #    fi
       #    if (( $(echo "$totalCoverage < 75" | bc -l) )); then
-      #    echo "❌ Code coverage below 75%. Failing build."
+      #    echo " Code coverage below 75%. Failing build."
       #    exit 1
       #    else
-      #    echo "✅ Code coverage is sufficient."
+      #    echo "Code coverage is sufficient."
       #    fi
       #   shell: bash
 
