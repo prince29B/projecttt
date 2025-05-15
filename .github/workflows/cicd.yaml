@@ -7,7 +7,7 @@ on:
     branches: [main]
 
 env:
-  DEV_ORG_ALIAS: DevHub
+  SCRATCH_ORG_ALIAS: my-scratch-org
   TEST_LEVEL: RunLocalTests
   APEX_TEST_RESULT_DIR: test-results
 
@@ -40,15 +40,16 @@ jobs:
           echo "${{ secrets.SFDX_JWT_AUTH_KEY }}" > server.key
           sfdx auth:jwt:grant --client-id ${{ secrets.SFDX_CLIENT_ID }} \
             --jwt-key-file server.key --username ${{ secrets.SFDX_DEVHUB_USERNAME }} \
-            --instance-url https://orgfarm-9e770cec2a-dev-ed.develop.my.salesforce.com --setdefaultdevhubusername
+            --instance-url https://orgfarm-9e770cec2a-dev-ed.develop.my.salesforce.com 
         shell: bash
 
-     # Remove the scratch org creation step entirely
-
-      - name: Push source
-        run: sfdx force:source:push -u ${{  env.DEV_ORG_ALIAS }}
+      - name: Deploy to Dev Org
+        run: sfdx force:source:deploy -p force-app -u ${{ env.SCRATCH_ORG_ALIAS }} --wait 10 
         shell: bash
 
+      - name: vaildate check of  Dev Org
+        run: sfdx force:source:deploy -p force-app -u ${{ env.SCRATCH_ORG_ALIAS }} --checkonly 
+        shell: bash
 
       # - name: Run Apex Tests
       #   run: |
