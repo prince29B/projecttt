@@ -124,8 +124,7 @@ jobs:
 
       - name: Deploy to Production
         run: |
-          sfdx force:source:deploy --targetusername ${{ secrets.SFDX_PROD_USERNAME }} \
-            --testlevel ${{ env.TEST_LEVEL }} --wait 10
+         sfdx force:source:deploy --targetusername ${{ secrets.SFDX_PROD_USERNAME }} --manifest manifest/package.xml --testlevel RunLocalTests --wait 10
         shell: bash
 
       - name: Post-deploy Tests
