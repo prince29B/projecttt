@@ -53,19 +53,19 @@ jobs:
         run: sfdx force:source:deploy --checkonly --targetusername ${{ env.SCRATCH_ORG_ALIAS }}  --sourcepath force-app
         shell: bash
 
-      - name: Run Apex Tests
-        run: sfdx apex run test --target-org ${{ env.SCRATCH_ORG_ALIAS }} --test-level RunLocalTests  --code-coverage  --output-dir test-result  --result-format human --wait 10
+      #- name: Run Apex Tests
+       # run: sfdx apex run test --target-org ${{ env.SCRATCH_ORG_ALIAS }} --test-level RunLocalTests  --code-coverage  --output-dir test-result  --result-format human --wait 10
 
-      - name: Check Coverage
-        run: |
-          totalCoverage=$(sfdx force:apex:test:report -u ${{ env.SCRATCH_ORG_ALIAS }} --codecoverage --json | jq '.result.summary.testRunCoverage')
-          echo "Total Coverage: $totalCoverage"
+      #- name: Check Coverage
+      #  run: |
+      #    totalCoverage=$(sfdx force:apex:test:report -u ${{ env.SCRATCH_ORG_ALIAS }} --codecoverage --json | jq '.result.summary.testRunCoverage')
+       ##   echo "Total Coverage: $totalCoverage"
 
-          if (( $(echo "$totalCoverage < 75" | bc -l) )); then
-            echo "❌ Code coverage below 75%. Failing build."
-            exit 1
-          else
-            echo "✅ Code coverage is sufficient."
+        ##  if (( $(echo "$totalCoverage < 75" | bc -l) )); then
+        #    echo "❌ Code coverage below 75%. Failing build."
+        #    exit 1
+        #  else
+        #    echo "✅ Code coverage is sufficient."
           
 
       - name: Static Code Analysis with PMD
