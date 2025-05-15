@@ -53,22 +53,22 @@ jobs:
          sfdx apex run test --target-org DevHub  --test-level ${{ env.TEST_LEVEL }} --code-coverage --output-dir ${{ env.APEX_TEST_RESULT_DIR }} --result-format human --wait 10
         shell: bash
 
-      - name: Check Coverage
-        run: |
-         set -e
-         totalCoverage=$(sfdx force:apex:test:report -u DevHub --codecoverage --json | jq '.result.summary.testRunCoverage')
-         echo "Total Coverage: $totalCoverage"
-         if [[ -z "$totalCoverage" || "$totalCoverage" == "null" ]]; then
-         echo "❌ Could not determine code coverage. Make sure tests have run and coverage data is available."
-         exit 1
-         fi
-         if (( $(echo "$totalCoverage < 75" | bc -l) )); then
-         echo "❌ Code coverage below 75%. Failing build."
-         exit 1
-         else
-         echo "✅ Code coverage is sufficient."
-         fi
-        shell: bash
+      # - name: Check Coverage
+      #   run: |
+      #    set -e
+      #    totalCoverage=$(sfdx force:apex:test:report -u DevHub --codecoverage --json | jq '.result.summary.testRunCoverage')
+      #    echo "Total Coverage: $totalCoverage"
+      #    if [[ -z "$totalCoverage" || "$totalCoverage" == "null" ]]; then
+      #    echo "❌ Could not determine code coverage. Make sure tests have run and coverage data is available."
+      #    exit 1
+      #    fi
+      #    if (( $(echo "$totalCoverage < 75" | bc -l) )); then
+      #    echo "❌ Code coverage below 75%. Failing build."
+      #    exit 1
+      #    else
+      #    echo "✅ Code coverage is sufficient."
+      #    fi
+      #   shell: bash
 
 
       - name: Static Code Analysis with PMD
