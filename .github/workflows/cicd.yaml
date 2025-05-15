@@ -7,7 +7,7 @@ on:
     branches: [main]
 
 env:
-  env.DEV_ORG_ALIAS: DevHub
+  DEV_ORG_ALIAS: DevHub
   TEST_LEVEL: RunLocalTests
   APEX_TEST_RESULT_DIR: test-results
 
