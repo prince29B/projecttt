@@ -46,7 +46,7 @@ jobs:
      # Remove the scratch org creation step entirely
 
       - name: Deploy source to Dev Org
-        run: sfdx force:source:deploy -u ${{ env.DEV_ORG_ALIAS }} --sourcepath force-app
+        run: sf project deploy start --source-dir force-app --target-org ${{ env.DEV_ORG_ALIAS }}
         shell: bash
 
       - name: Validate deployment (optional)
