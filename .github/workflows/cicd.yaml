@@ -78,7 +78,7 @@ jobs:
          npm ci
          npx eslint "force-app/**/default/lwc/**/*.js" --ext .js --max-warnings 0 --no-error-on-unmatched-pattern
          npx prettier --check "force-app/**/*.{cls,js,html}"
-         shell: bash
+        shell: bash
 
 
       - name: PR Rejection Conditions
