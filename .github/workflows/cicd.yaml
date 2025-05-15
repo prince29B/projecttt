@@ -7,7 +7,7 @@ on:
     branches: [main]
 
 env:
-  SCRATCH_ORG_ALIAS: my-scratch-org
+  DEV_ORG_ALIAS: dev-org
   TEST_LEVEL: RunLocalTests
   APEX_TEST_RESULT_DIR: test-results
 
@@ -44,11 +44,11 @@ jobs:
         shell: bash
 
       - name: Deploy to Dev Org
-        run: sfdx force:source:deploy -p force-app -u ${{ env.SCRATCH_ORG_ALIAS }} --wait 10 
+        run: sfdx force:source:deploy -p force-app -u ${{ env.DEV_ORG_ALIAS }} --wait 10 
         shell: bash
 
-      - name: vaildate check of  Dev Org
-        run: sfdx force:source:deploy -p force-app -u ${{ env.SCRATCH_ORG_ALIAS }} --checkonly 
+      - name: vaildate check of Dev Org
+        run: sfdx force:source:deploy -p force-app -u ${{ env.DEV_ORG_ALIAS }} --checkonly 
         shell: bash
 
       # - name: Run Apex Tests
