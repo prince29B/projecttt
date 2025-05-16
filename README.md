@@ -1,38 +1,42 @@
 # Salesforce CI/CD Pipeline
 
-Automated Salesforce deployments and code checks using GitHub Actions.
+This repository uses GitHub Actions to automate Salesforce deployments and code validation.
 
 ---
 
-## Workflow Overview
+## 🌳 Branching Strategy
 
-- **Pull Requests to `main`**
-  - Code is validated in a scratch org.
-  - Deployment is checked.
-  - If all checks pass, GitHub marks the PR as ready to merge.
-
-- **Pushes to `main` (after PR merge)**
-  - Code is deployed to production.
-  - Post-deployment tests run.
-
-> **Note:**  
-> Merging is controlled by GitHub branch protection rules, not by a workflow step.  
-> Set up branch protection to require this workflow to pass before merging.
+- **main**: Stable, production-ready branch. All deployments originate here.
+- **feature/\***: For new features or bug fixes. Merge into `main` via Pull Request (PR).
+- **PRs**: All changes must be validated by the CI pipeline before merging.
 
 ---
 
-## Branching Strategy
+## 🔄 CI/CD Flow Diagram
 
-- **main**: Production code only.
-- **feature/**: Branch from `main` for changes.
-- All changes go through PRs to `main`.
+graph TD
+A[Feature Branch] -->|Pull Request| B[CI: Validate Deployment & Tests]
+B -->|Checks Pass| C[Merge to main]
+C --> D[CI: Deploy to UAT/Production]
+
+
+**Summary:**
+1. Open a PR to `main` to trigger validation (deployment check, Apex tests, code quality).
+2. On merge to `main`, deployment to UAT/Production is automatically triggered.
 
 ---
 
-## Troubleshooting
+## 🛠️ Troubleshooting Steps
 
-- **Scratch org issues**: Check config and DevHub credentials.
-- **Deployment errors**: Review logs in GitHub Actions.
-- **Auth problems**: Verify GitHub secrets and Salesforce connected app.
+- **Authentication Issues**
+  - Ensure all required GitHub Secrets (`SFDX_JWT_AUTH_KEY`, `SFDX_CLIENT_ID`, `SFDX_DEVHUB_USERNAME`, `SFDX_PROD_USERNAME`) are set and valid.
 
-Credentials are stored in GitHub Secrets.
+- **Deployment Failures**
+  - Review the Actions workflow logs for errors.
+  - Check for missing or invalid metadata in `force-app` or `manifest/package.xml`.
+
+- **Code Quality/Test Failures**
+  - Review PMD, ESLint, and Prettier outputs in the logs.
+  - Run tests and linters locally to resolve issues before pushing.
+
+
