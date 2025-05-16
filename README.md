@@ -7,7 +7,6 @@ Automated Salesforce deployments and code checks using GitHub Actions.
 ## Workflow Overview
 
 - **Pull Requests to `main`**
-
   - Code is validated in a scratch org.
   - Deployment is checked.
   - If all checks pass, GitHub marks the PR as ready to merge.
