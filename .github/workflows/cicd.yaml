@@ -29,7 +29,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: "16"
+          node-version: '16'
 
       - name: Install Salesforce CLI
         run: npm install --global sfdx-cli
@@ -50,7 +50,7 @@ jobs:
 
       - name: Run Apex Tests
         run: |
-          sfdx apex run test --target-org DevHub  --test-level ${{ env.TEST_LEVEL }} --code-coverage --output-dir ${{ env.APEX_TEST_RESULT_DIR }} --result-format human --wait 10
+         sfdx apex run test --target-org DevHub  --test-level ${{ env.TEST_LEVEL }} --code-coverage --output-dir ${{ env.APEX_TEST_RESULT_DIR }} --result-format human --wait 10
         shell: bash
 
       # - name: Check Coverage
@@ -59,16 +59,17 @@ jobs:
       #    totalCoverage=$(sfdx force:apex:test:report -u DevHub --codecoverage --json | jq '.result.summary.testRunCoverage')
       #    echo "Total Coverage: $totalCoverage"
       #    if [[ -z "$totalCoverage" || "$totalCoverage" == "null" ]]; then
-      #    echo " Could not determine code coverage. Make sure tests have run and coverage data is available."
+      #    echo "❌ Could not determine code coverage. Make sure tests have run and coverage data is available."
       #    exit 1
       #    fi
       #    if (( $(echo "$totalCoverage < 75" | bc -l) )); then
-      #    echo " Code coverage below 75%. Failing build."
+      #    echo "❌ Code coverage below 75%. Failing build."
       #    exit 1
       #    else
-      #    echo "Code coverage is sufficient."
+      #    echo "✅ Code coverage is sufficient."
       #    fi
       #   shell: bash
+
 
       - name: Static Code Analysis with PMD
         run: |
@@ -79,10 +80,11 @@ jobs:
 
       - name: ESLint + Prettier
         run: |
-          npm ci
-          npx eslint "force-app/**/default/lwc/**/*.js" --ext .js --max-warnings 0 --no-error-on-unmatched-pattern
-          npx prettier --check "force-app/**/*.{cls,js,html}"
+         npm ci
+         npx eslint "force-app/**/default/lwc/**/*.js" --ext .js --max-warnings 0 --no-error-on-unmatched-pattern
+         npx prettier --check "force-app/**/*.{cls,js,html}"
         shell: bash
+
 
       - name: PR Rejection Conditions
         if: failure()
@@ -102,7 +104,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: "16"
+          node-version: '16'
 
       - name: Install Salesforce CLI
         run: npm install --global sfdx-cli
@@ -117,7 +119,7 @@ jobs:
 
       - name: Deploy to Production
         run: |
-          sfdx force:source:deploy --targetusername ${{ secrets.SFDX_PROD_USERNAME }} --manifest manifest/package.xml --testlevel RunLocalTests --wait 10
+         sfdx force:source:deploy --targetusername ${{ secrets.SFDX_PROD_USERNAME }} --manifest manifest/package.xml --testlevel RunLocalTests --wait 10
         shell: bash
 
       - name: Post-deploy Tests
